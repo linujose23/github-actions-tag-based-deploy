@@ -1,9 +1,9 @@
 name: Deploy to GKE and Push to Artifact Registry
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    tags:
+      - 'prod'
 
 jobs:
   deploy:
@@ -28,7 +28,7 @@ jobs:
       - run: |-
           gcloud --quiet auth configure-docker asia-south1-docker.pkg.dev
 
-        #obtain the short SHA-1 hash of the latest commit and echoing env var as SHA_SHORT appending it to file github_env
+      # Obtain the short SHA-1 hash of the latest commit and echo the env var as SHA_SHORT, appending it to the file github_env
       - name: Set outputs
         run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
