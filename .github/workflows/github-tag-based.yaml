@@ -3,7 +3,7 @@ name: Deploy to GKE and Push to Artifact Registry
 on:
   push:
     tags:
-      - '*'
+      - 'release*'
 
 jobs:
   deploy:
