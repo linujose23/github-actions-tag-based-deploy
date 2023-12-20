@@ -3,7 +3,7 @@ name: Deploy to GKE and Push to Artifact Registry
 on:
   push:
     tags:
-      - 'prod'
+      - 'release*'
 
 jobs:
   deploy:
@@ -40,7 +40,7 @@ jobs:
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
 
-      # Push the Docker image to Google Cloud Registry
+      # Push the Docker image to Google Cloud artifact Registry
       - name: Publish
         run: |-
           docker push "asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:${{ env.SHA_SHORT }}"
