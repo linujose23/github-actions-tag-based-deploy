@@ -32,18 +32,26 @@ jobs:
       - name: Set outputs
         run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+      # Print build parameters
+      - name: Print Build Parameters
+        run: |
+          echo "Build Parameters:"
+          echo "  - Docker Image Tag: asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:release-${{ env.SHA_SHORT }}"
+          echo "  - GitHub Ref: $GITHUB_REF"
+          echo "  - Short SHA-1: ${{ env.SHA_SHORT }}"
+
       # Build the Docker image
       - name: Build
         run: |-
           docker build \
-            --tag "asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:${{ env.SHA_SHORT }}" \
+            --tag "asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:release-${{ env.SHA_SHORT }}" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
 
-      # Push the Docker image to Google Cloud artifact Registry
+      # Push the Docker image to Google Cloud Artifact Registry
       - name: Publish
         run: |-
-          docker push "asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:${{ env.SHA_SHORT }}"
+          docker push "asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:release-${{ env.SHA_SHORT }}"
 
       - name: Set latest tag as output
         id: set-latest-tag
@@ -56,7 +64,7 @@ jobs:
         run: |
           echo "Updating Kubernetes Deployment..."
 
-          sed -i "s#asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:.*#asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:${{ env.SHA_SHORT }}#" .github/deploy/deployment.yaml
+          sed -i "s#asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:.*#asia-south1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/linu-artifact-repo/python-app:release-${{ env.SHA_SHORT }}#" .github/deploy/deployment.yaml
           kubectl apply -f .github/deploy/deployment.yaml -n linu-ns
           echo "Issuing rollout restart..."
           kubectl rollout restart deploy python-app -n linu-ns
